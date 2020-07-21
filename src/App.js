@@ -9,9 +9,10 @@ import { Route, Redirect, Switch } from "react-router-dom";
 import Customer from "./component/customer";
 import Rental from "./component/rentals";
 import NotFound from "./component/notFound";
-import MoviesFrom from "./component/moviesFrom";
 import LoginForm from "./component/loginForm";
 import Register from "./component/register";
+import NewMovie from "./component/newMovie";
+import MovieForm from "./component/movieForm";
 
 class App extends Component {
   render() {
@@ -21,7 +22,7 @@ class App extends Component {
         <Switch>
           <Route path="/register" component={Register} />
           <Route path="/login" component={LoginForm} />
-          <Route path="/movies/:id" component={MoviesFrom} />
+          <Route path="/movies/:id" component={MovieForm} />
           <Route path="/movies" component={Movies} />
           <Route path="/customer" component={Customer} />
           <Route path="/rental" component={Rental} />

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import Joi from "joi-browser";
+import Joi, { options } from "joi-browser";
 import Input from "./input.";
+import Select from "./select";
 class Form extends Component {
   state = {
     data: {},
@@ -9,6 +10,7 @@ class Form extends Component {
   validate = () => {
     const option = { abortEarly: false };
     const { error } = Joi.validate(this.state.data, this.schema, option);
+
     if (!error) return null;
     const errors = {};
     for (let item of error.details) {
@@ -27,6 +29,7 @@ class Form extends Component {
     e.preventDefault();
     const errors = this.validate();
     this.setState({ errors: errors || {} });
+
     if (errors) return;
     this.doSubmit();
   };
@@ -54,8 +57,22 @@ class Form extends Component {
         name={name}
         label={label}
         value={data[name]}
-        onchange={this.handleChange}
+        onChange={this.handleChange}
         type={type}
+        error={errors[name]}
+      />
+    );
+  };
+
+  renderSelect = (name, label, options) => {
+    const { data, errors } = this.state;
+    return (
+      <Select
+        name={name}
+        label={label}
+        value={data[name]}
+        options={options}
+        onChange={this.handleChange}
         error={errors[name]}
       />
     );
