@@ -1,25 +1,33 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
-import "./App.css";
-
-import Movies from "./component/movies";
-
-import NavBar from "./component/navBar";
+import { ToastContainer } from "react-toastify";
 import { Route, Redirect, Switch } from "react-router-dom";
+import jwtDecode from "jwt-decode";
+import Movies from "./component/movies";
+import NavBar from "./component/navBar";
 import Customer from "./component/customer";
 import Rental from "./component/rentals";
 import NotFound from "./component/notFound";
 import LoginForm from "./component/loginForm";
 import Register from "./component/register";
-import NewMovie from "./component/newMovie";
 import MovieForm from "./component/movieForm";
+import auth from "./services/authServices";
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
+import Logout from "./component/logout";
 
 class App extends Component {
+  state = {};
+  componentDidMount() {
+    const user = auth.getCurrentUser();
+    this.setState({ user });
+  }
   render() {
     return (
       <main className="container">
-        <NavBar></NavBar>
+        <ToastContainer />
+        <NavBar user={this.state.user} />
         <Switch>
+          <Route path="/logout" component={Logout} />
           <Route path="/register" component={Register} />
           <Route path="/login" component={LoginForm} />
           <Route path="/movies/:id" component={MovieForm} />

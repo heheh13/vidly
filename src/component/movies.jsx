@@ -1,30 +1,47 @@
 import React, { Component } from "react";
 
-import { getMovies } from "../services/fakeMovieService.js";
+import { getMovies, deleteMovie } from "../services/movieService.js";
 
 import Pagination from "../common/pagination";
 import Paginate from "../utils/paginate";
 import ListGroup from "../common/listGroup";
-import { getGenres } from "../services/fakeGenreService";
 import MoviesTable from "./moviesTable";
-import _ from "lodash";
+import _, { conformsTo } from "lodash";
 import { Link } from "react-router-dom";
+import SearchBox from "./searchBox.jsx";
+
+import { getGenres } from "../services/GenreService.js";
+import { toast } from "react-toastify";
+const apiGenres = "http://localhost:3900/api/genres";
+const apiMovies = "http://localhost:3900/api/movies";
 class Movies extends Component {
   state = {
     movies: [],
     genres: [],
     pageSize: 4,
     currentPage: 1,
+    searchQuery: "",
     activeGenre: "All Genres",
     sortColumn: { path: "title", order: "asc" },
   };
-  componentDidMount() {
-    const genres = [{ name: "All Genres", _id: "nothing" }, ...getGenres()];
-    this.setState({ movies: getMovies(), genres });
+  async componentDidMount() {
+    const { data } = await getGenres();
+    const genres = [{ name: "All Genres", _id: "nothing" }, ...data];
+    const { data: movies } = await getMovies();
+    this.setState({ movies, genres });
   }
-  handleDelete = (id) => {
+  handleDelete = async (id) => {
+    const originalMovies = this.state.movies;
     const movies = this.state.movies.filter((m) => m._id != id);
     this.setState({ movies });
+    try {
+      await deleteMovie(id);
+    } catch (ex) {
+      if (ex.response && ex.response.status === 404) {
+        toast("movie not found");
+      }
+      this.setState({ movies: originalMovies });
+    }
   };
   handleLike = (movie) => {
     const movies = [...this.state.movies];
@@ -41,6 +58,9 @@ class Movies extends Component {
   handleSort = (sortColumn) => {
     this.setState({ sortColumn });
   };
+  handleSearch = (query) => {
+    this.setState({ searchQuery: query, currentPage: 1, activeGenre: null });
+  };
 
   getPageData = () => {
     const {
@@ -49,27 +69,37 @@ class Movies extends Component {
       movies: allmovies,
       activeGenre,
       sortColumn,
+      searchQuery,
     } = this.state;
-    const filterdMovies =
-      activeGenre === "All Genres"
-        ? allmovies
-        : allmovies.filter((g) => g.genre.name == activeGenre);
+    let filterdMovies = undefined;
+    if (searchQuery) {
+      filterdMovies = allmovies.filter((m) =>
+        m.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+      );
+    } else {
+      filterdMovies =
+        activeGenre === "All Genres"
+          ? allmovies
+          : allmovies.filter((g) => g.genre.name == activeGenre);
+    }
 
     const sortedMovies = _.orderBy(
       filterdMovies,
       [sortColumn.path],
       [sortColumn.order]
     );
-
     const movies = Paginate(sortedMovies, pageSize, currentPage);
     return { totalCount: filterdMovies.length, data: movies };
   };
 
   render() {
-    const { currentPage, pageSize, movies: allmovies } = this.state;
+    const {
+      currentPage,
+      pageSize,
+      movies: allmovies,
+      searchQuery,
+    } = this.state;
     const { length: numberofmoive } = this.state.movies;
-
-    if (numberofmoive == 0) return <h1>Nothing in the database</h1>;
 
     const { totalCount, data: movies } = this.getPageData();
 
@@ -86,6 +116,7 @@ class Movies extends Component {
           <Link to="/movies/new">
             <button className="btn btn-primary">NewMovie</button>
           </Link>
+          <SearchBox value={searchQuery} onChange={this.handleSearch} />
           <h4>number of movies = {totalCount}</h4>
           <MoviesTable
             movies={movies}
