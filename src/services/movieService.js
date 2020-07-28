@@ -1,5 +1,5 @@
 import http from "./httpRequest";
-const apiEndpoint = "http://localhost:3900/api/movies";
+const apiEndpoint = "/movies";
 export function getMovies() {
   return http.get(apiEndpoint);
 }

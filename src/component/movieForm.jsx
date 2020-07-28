@@ -1,7 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 import Form from "../common/form";
 import Joi from "joi-browser";
-import { getGenres } from "../services/GenreService";
+import { getGenres } from "../services/genreServies";
 import { saveMovie, getMovie } from "../services/movieService";
 class MovieForm extends Form {
   state = {
@@ -40,7 +40,7 @@ class MovieForm extends Form {
       const { data: movie } = await getMovie(movieId);
       this.setState({ data: this.mapToViewModel(movie) });
     } catch (ex) {
-      if (ex.response && ex.response.status == 404) {
+      if (ex.response && ex.response.status === 404) {
         return this.props.history.replace("/not-found");
       }
     }

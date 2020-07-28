@@ -6,14 +6,12 @@ import Pagination from "../common/pagination";
 import Paginate from "../utils/paginate";
 import ListGroup from "../common/listGroup";
 import MoviesTable from "./moviesTable";
-import _, { conformsTo } from "lodash";
+import _ from "lodash";
 import { Link } from "react-router-dom";
 import SearchBox from "./searchBox.jsx";
 
-import { getGenres } from "../services/GenreService.js";
+import { getGenres } from "../services/genreServies.js";
 import { toast } from "react-toastify";
-const apiGenres = "http://localhost:3900/api/genres";
-const apiMovies = "http://localhost:3900/api/movies";
 class Movies extends Component {
   state = {
     movies: [],
@@ -32,7 +30,7 @@ class Movies extends Component {
   }
   handleDelete = async (id) => {
     const originalMovies = this.state.movies;
-    const movies = this.state.movies.filter((m) => m._id != id);
+    const movies = this.state.movies.filter((m) => m._id !== id);
     this.setState({ movies });
     try {
       await deleteMovie(id);
@@ -80,7 +78,7 @@ class Movies extends Component {
       filterdMovies =
         activeGenre === "All Genres"
           ? allmovies
-          : allmovies.filter((g) => g.genre.name == activeGenre);
+          : allmovies.filter((g) => g.genre.name === activeGenre);
     }
 
     const sortedMovies = _.orderBy(
@@ -93,16 +91,11 @@ class Movies extends Component {
   };
 
   render() {
-    const {
-      currentPage,
-      pageSize,
-      movies: allmovies,
-      searchQuery,
-    } = this.state;
+    const { currentPage, pageSize, searchQuery } = this.state;
     const { length: numberofmoive } = this.state.movies;
 
     const { totalCount, data: movies } = this.getPageData();
-
+    const { user } = this.props;
     return (
       <div className="row">
         <div className="col-3">
@@ -113,9 +106,11 @@ class Movies extends Component {
           />
         </div>
         <div className="col-8">
-          <Link to="/movies/new">
-            <button className="btn btn-primary">NewMovie</button>
-          </Link>
+          {user && (
+            <Link to="/movies/new">
+              <button className="btn btn-primary">NewMovie</button>
+            </Link>
+          )}
           <SearchBox value={searchQuery} onChange={this.handleSearch} />
           <h4>number of movies = {totalCount}</h4>
           <MoviesTable

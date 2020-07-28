@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ToastContainer } from "react-toastify";
 import { Route, Redirect, Switch } from "react-router-dom";
-import jwtDecode from "jwt-decode";
+
 import Movies from "./component/movies";
 import NavBar from "./component/navBar";
 import Customer from "./component/customer";
@@ -14,6 +14,7 @@ import auth from "./services/authServices";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import Logout from "./component/logout";
+import ProtectedRoute from "./common/protectedRoute";
 
 class App extends Component {
   state = {};
@@ -22,16 +23,21 @@ class App extends Component {
     this.setState({ user });
   }
   render() {
+    const { user } = this.state;
+
     return (
       <main className="container">
         <ToastContainer />
-        <NavBar user={this.state.user} />
+        <NavBar user={user} />
         <Switch>
           <Route path="/logout" component={Logout} />
           <Route path="/register" component={Register} />
           <Route path="/login" component={LoginForm} />
-          <Route path="/movies/:id" component={MovieForm} />
-          <Route path="/movies" component={Movies} />
+          <ProtectedRoute path="/movies/:id" component={MovieForm} />
+          <Route
+            path="/movies"
+            render={(props) => <Movies {...props} user={user}></Movies>}
+          />
           <Route path="/customer" component={Customer} />
           <Route path="/rental" component={Rental} />
           <Route path="/not-found" component={NotFound} />
